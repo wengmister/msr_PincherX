@@ -110,12 +110,13 @@ if __name__=="__main__":
     test_viewer = Viewer()
 
     depth, color = test_viewer.get_frames()
+
     print(depth.shape)
-    print(color.shape)
+    print(color)
 
     color = cv2.cvtColor(color, cv2.COLOR_BGR2HSV) #
-    # plt.imshow(color)
-    # plt.show()
+    plt.imshow(color)
+    plt.show()
     
     # test_viewer.stream()
 
