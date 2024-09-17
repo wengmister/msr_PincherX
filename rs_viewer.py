@@ -127,22 +127,21 @@ class Viewer:
                 color_image = np.asanyarray(color_frame.get_data())
                 
                 mask, _ = mask_hsv(color_image, color_dict_HSV[color_str][1], color_dict_HSV[color_str][0])
-                print(mask.shape)
 
+                # convert non-3d images to 3d
+                depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels -> expanding dimensionality to enable comparison
+                mask_3d = np.dstack((mask, mask, mask))
 
-                # Remove background - Set pixels further than clipping_distance to grey
-                # grey_color = 153
-                # depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels -> expanding dimensionality to enable comparison
-                # bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
+                # Remove background
+                removed_color = 0
+                bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, color_image)
+                mask_bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, mask_3d)
 
                 # Render images:
-                #   depth align to color on left
-                #   depth on right
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-                # images = np.hstack((mask, depth_colormap))
+                images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
 
-                # cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-                cv2.imshow('Align Example', mask)
+                cv2.imshow('Mask Example', images)
                 key = cv2.waitKey(1)
                 # Press esc or 'q' to close the image window
                 if key & 0xFF == ord('q') or key == 27:
