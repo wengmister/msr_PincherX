@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 class Viewer:
-    def __init__(self):
+    def __init__(self, enable_record = False, enable_playback = False, filename = None):
         ### [1]
         self.pipeline = rs.pipeline()
         self.config = rs.config()
@@ -16,6 +16,13 @@ class Viewer:
 
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+        if enable_record:
+            self.config.enable_record_to_file(filename)
+        if enable_playback:
+            self.config.enable_device_from_file(filename)
+
+        # NEED TO FINISH MODIFYING CONFIG BEFORE THIS LINE
         self.profile = self.pipeline.start(self.config)
         # auto setting depth scale
         depth_sensor = self.profile.get_device().first_depth_sensor()
@@ -82,8 +89,8 @@ class Viewer:
 
 if __name__=="__main__":
 
+    # test_viewer = Viewer(enable_playback=True, filename="test_record.bag")
     test_viewer = Viewer()
-
     test_viewer.stream()
 
 
