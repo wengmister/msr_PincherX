@@ -182,7 +182,7 @@ class Viewer:
 
                 # preset values
                 if preset_hsv:
-                    lower_hsv = (115, 90, 80)
+                    lower_hsv = (100, 70, 70)
                     upper_hsv = (135, 245, 200)
                     thresh = 120
                 else:
@@ -230,6 +230,59 @@ class Viewer:
         finally:
             self.pipeline.stop()
 
+    def get_centroid_and_depth(self):
+        """
+        Returns the centroid coordinates and depth of the largest captured contour
+        without opening viewer windows.
+        """
+        # Get frameset of color and depth
+        frames = self.pipeline.wait_for_frames()
+
+        # Align the depth frame to color frame
+        aligned_frames = self.align.process(frames)
+
+        # Get aligned frames
+        aligned_depth_frame = aligned_frames.get_depth_frame()  # aligned_depth_frame is a 640x480 depth image
+        color_frame = aligned_frames.get_color_frame()
+
+        # Validate that both frames are valid
+        if not aligned_depth_frame or not color_frame:
+            return None, None  # Return None if no valid frames
+
+        depth_image = np.asanyarray(aligned_depth_frame.get_data())
+        color_image = np.asanyarray(color_frame.get_data())
+
+        # preset values or manual control for HSV thresholds
+
+        lower_hsv = (100, 70, 70)
+        upper_hsv = (135, 245, 200)
+        thresh = 120
+
+        # Apply HSV mask
+        mask, _ = mask_hsv(color_image, lower_hsv, upper_hsv)
+        mask = cv2.GaussianBlur(mask, (5, 5), 0)
+
+        # convert non-3d images to 3d
+        depth_image_3d = np.dstack((depth_image, depth_image, depth_image))  # depth image is 1 channel, color is 3 channels -> expanding dimensionality to enable comparison
+        mask_3d = np.dstack((mask, mask, mask))
+
+        # Remove background
+        removed_color = 0
+        mask_bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, mask_3d)
+
+        # Trace contour and calculate the center of mass (COM)
+        contours, coms, area = ordered_contour(mask_bg_removed[:, :, 0], thresh)
+
+        if not area:
+            print("Too far! Else object not found")
+            return None, None
+
+        # Calculate the distance of the centroid in camera space
+        distance_com = get_distance_at_point(depth_image, coms[0], coms[1])
+        distance_in_meters = self.get_meter_distance(distance_com)
+
+        # Return the centroid and its depth
+        return coms, distance_in_meters
 
 
 if __name__=="__main__":
@@ -237,7 +290,9 @@ if __name__=="__main__":
     # test_viewer = Viewer(enable_playback=True, filename="test_record.bag")
     
     test_viewer = Viewer()
-    test_viewer.masked_stream(preset_hsv=True)
+    # test_viewer.masked_stream(preset_hsv=True)
+    centroid, depth = test_viewer.get_centroid_and_depth()
+
 
     # depth, color = test_viewer.get_frames()
 

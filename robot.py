@@ -5,32 +5,12 @@ import modern_robotics as mr
 from calibration_points import *
 
 
-
-
-def htm_from_xz_only(x, z):
-    """
-    Produce a homogeneous transformation matrix given x and z, ignoring the y input.
-    
-    Parameters:
-    x (float): Translation along the x-axis
-    z (float): Translation along the z-axis
-    
-    Returns:
-    numpy.ndarray: The 4x4 homogeneous transformation matrix
-    """
-    # Create the homogeneous transformation matrix with only translation
-    T = np.eye(4)
-    T[0, 3] = x  # Set translation along the x-axis
-    T[2, 3] = z  # Set translation along the z-axis
-    
-    return T
-
 class Robot:
     def __init__(self):
         self.robot = InterbotixManipulatorXS("px100", "arm", "gripper")
         robot_startup()
         self.robot.arm.go_to_home_pose()
-        self.robot.gripper.release()
+        # self.robot.gripper.release()
 
     def shutdown(self):
         robot_shutdown()
@@ -103,12 +83,14 @@ class Robot:
 if __name__ == "__main__":
 
     test_robot = Robot()
+    test_robot.robot.gripper.release()
+    test_robot.robot.gripper.grasp()
 
-    x_limit = 0.2  # Define limits for x axis
-    y_limit = 0.2  # Define limits for y axis
-    z_limit = 0.3  # Define limits for z axis
-    num_points_x = 3  # Number of points along the x axis
-    num_points_y = 3  # Number of points along the y axis
+    x_limit = 0.15  # Define limits for x axis
+    y_limit = 0.05  # Define limits for y axis
+    z_limit = 0.25  # Define limits for z axis
+    num_points_x = 2  # Number of points along the x axis
+    num_points_y = 2  # Number of points along the y axis
     num_points_z = 2  # Number of points along the z axis
 
     calibration_coordinates = generate_linspaced_coordinates(x_limit, y_limit, z_limit, num_points_x, num_points_y, num_points_z)
