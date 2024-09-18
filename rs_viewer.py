@@ -106,7 +106,40 @@ class Viewer:
         finally:
             self.pipeline.stop()
 
-    def masked_stream(self, color_str):
+    def on_trackbar(self, val):
+        pass
+
+    def create_hsv_trackbars(self, window_name):
+        # Create trackbars for lower HSV values
+        cv2.createTrackbar('Lower H', window_name, 0, 179, self.on_trackbar)
+        cv2.createTrackbar('Lower S', window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar('Lower V', window_name, 0, 255, self.on_trackbar)
+
+        # Create trackbars for upper HSV values
+        cv2.createTrackbar('Upper H', window_name, 0, 179, self.on_trackbar)
+        cv2.createTrackbar('Upper S', window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar('Upper V', window_name, 0, 255, self.on_trackbar)
+
+    def get_hsv_values(self, window_name):
+        # Get current positions of all trackbars for lower HSV
+        lower_h = cv2.getTrackbarPos('Lower H', window_name)
+        lower_s = cv2.getTrackbarPos('Lower S', window_name)
+        lower_v = cv2.getTrackbarPos('Lower V', window_name)
+
+        # Get current positions of all trackbars for upper HSV
+        upper_h = cv2.getTrackbarPos('Upper H', window_name)
+        upper_s = cv2.getTrackbarPos('Upper S', window_name)
+        upper_v = cv2.getTrackbarPos('Upper V', window_name)
+
+        return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v)
+
+    def masked_stream(self, preset_hsv = False):
+
+        hsv_window_name = "hsv_window"
+    
+            # Create a window and the trackbars for HSV control
+        cv2.namedWindow(hsv_window_name)
+        self.create_hsv_trackbars(hsv_window_name)
         try:
             while True:
                 # Get frameset of color and depth
@@ -126,8 +159,13 @@ class Viewer:
 
                 depth_image = np.asanyarray(aligned_depth_frame.get_data())
                 color_image = np.asanyarray(color_frame.get_data())
-                
-                mask, _ = mask_hsv(color_image, color_dict_HSV[color_str][1], color_dict_HSV[color_str][0])
+
+                if preset_hsv:
+                    lower_hsv = (50, 30, 36)
+                    upper_hsv = (176, 249, 171)
+                else:
+                    lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)
+                mask, _ = mask_hsv(color_image, lower_hsv, upper_hsv)
 
                 # convert non-3d images to 3d
                 depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels -> expanding dimensionality to enable comparison
@@ -146,7 +184,7 @@ class Viewer:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
 
-                cv2.imshow('Mask Example', images)
+                cv2.imshow(hsv_window_name, images)
                 key = cv2.waitKey(1)
                 # Press esc or 'q' to close the image window
                 if key & 0xFF == ord('q') or key == 27:
@@ -162,7 +200,7 @@ if __name__=="__main__":
     # test_viewer = Viewer(enable_playback=True, filename="test_record.bag")
     
     test_viewer = Viewer()
-    test_viewer.masked_stream("purple")
+    test_viewer.masked_stream(True)
 
     depth, color = test_viewer.get_frames()
 
