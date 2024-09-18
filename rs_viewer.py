@@ -282,7 +282,7 @@ class Viewer:
         distance_in_meters = self.get_meter_distance(distance_com)
 
         # Return the centroid and its depth
-        return coms, distance_in_meters
+        return coms, distance_in_meters, aligned_depth_frame
 
 
 if __name__=="__main__":
