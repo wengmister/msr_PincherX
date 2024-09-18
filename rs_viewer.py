@@ -120,6 +120,9 @@ class Viewer:
         cv2.createTrackbar('Upper S', window_name, 0, 255, self.on_trackbar)
         cv2.createTrackbar('Upper V', window_name, 0, 255, self.on_trackbar)
 
+        # Threshold:
+        cv2.createTrackbar('Threshold', window_name, 0, 255, self.on_trackbar)
+
     def get_hsv_values(self, window_name):
         # Get current positions of all trackbars for lower HSV
         lower_h = cv2.getTrackbarPos('Lower H', window_name)
@@ -131,7 +134,10 @@ class Viewer:
         upper_s = cv2.getTrackbarPos('Upper S', window_name)
         upper_v = cv2.getTrackbarPos('Upper V', window_name)
 
-        return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v)
+        # Threshold:
+        threshold = cv2.getTrackbarPos('Threshold', window_name)
+
+        return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v), threshold
 
     def masked_stream(self, preset_hsv = False):
 
@@ -163,8 +169,9 @@ class Viewer:
                 if preset_hsv:
                     lower_hsv = (50, 30, 36)
                     upper_hsv = (176, 249, 171)
+                    thresh = 20
                 else:
-                    lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)
+                    lower_hsv, upper_hsv, thresh = self.get_hsv_values(hsv_window_name)
                 mask, _ = mask_hsv(color_image, lower_hsv, upper_hsv)
 
                 # convert non-3d images to 3d
@@ -177,16 +184,21 @@ class Viewer:
                 mask_bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, mask_3d)
 
                 # Trace contour
-                cont, area = ordered_contour(mask_bg_removed[0], threshold=10)
+                contours, coms, area = ordered_contour(mask_bg_removed[:,:,0], thresh)
+                
                 if not area:
                     print("Too far! Else object not found")
                 else:
-                    print(area)
+                    print(f"The COM of the largest contour is at {coms} with area {area}.")
 
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
+                contour_image = cv2.cvtColor(mask_bg_removed[:,:,0], cv2.COLOR_GRAY2BGR)  # Ensure it's in BGR for color drawing
+                cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)  # Draw all contours with green color
 
+                # Display the image with contours
+                cv2.imshow('Contours', contour_image)
                 # Display
                 cv2.imshow(hsv_window_name, images)
 
