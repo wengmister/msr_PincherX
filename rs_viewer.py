@@ -210,11 +210,13 @@ class Viewer:
                     
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-                images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
                 contour_image = cv2.cvtColor(mask_bg_removed[:,:,0], cv2.COLOR_GRAY2BGR)  # Ensure it"s in BGR for color drawing
+
+
                 cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)  # Draw all contours with green color
                 cv2.circle(contour_image, coms, 10, (0, 0, 255), -1)
                 # Display the image with cqontours
+                images = np.hstack((mask_bg_removed, depth_colormap, bg_removed, contour_image))
                 cv2.imshow(threshold_window, contour_image)
                 # Display
                 cv2.imshow(hsv_window_name, images)

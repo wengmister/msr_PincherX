@@ -17,12 +17,15 @@ def initialize_camera():
 def gyro_data(gyro):
     return np.asarray([gyro.x, gyro.y, gyro.z])
 
-
 def accel_data(accel):
     return np.asarray([accel.x, accel.y, accel.z])
 
 def get_accel_frame(frame, motion_ind):
     return accel_data(frame[motion_ind].as_motion_frame().get_motion_data())
+
+def get_gyro_frame(frame, motion_ind):
+    return gyro_data(frame[motion_ind].as_motion_frame().get_motion_data())
+
 
 if __name__=="__main__":
     p = initialize_camera()
