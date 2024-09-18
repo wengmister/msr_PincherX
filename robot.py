@@ -103,6 +103,10 @@ if __name__ == "__main__":
 
     test_robot = Robot()
 
+    calibration_list = [[0.2, -0.2, 0.1]
+                        [0.2 ,0.2, 0.1]
+                        [-0.2, -0.2, 0.1]]
+
     test_robot.robot.arm.set_ee_pose_components(0.2, -0.2, 0.1)
     
     test_robot.robot.gripper.grasp()
