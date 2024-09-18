@@ -120,7 +120,7 @@ class Viewer:
         cv2.createTrackbar('Upper S', window_name, 0, 255, self.on_trackbar)
         cv2.createTrackbar('Upper V', window_name, 0, 255, self.on_trackbar)
 
-        # Threshold:
+    def create_threshold_trackbar(self, window_name):
         cv2.createTrackbar('Threshold', window_name, 0, 255, self.on_trackbar)
 
     def get_hsv_values(self, window_name):
@@ -134,18 +134,24 @@ class Viewer:
         upper_s = cv2.getTrackbarPos('Upper S', window_name)
         upper_v = cv2.getTrackbarPos('Upper V', window_name)
 
-        # Threshold:
+        return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v),
+
+    def get_threshold_val(self, window_name):
         threshold = cv2.getTrackbarPos('Threshold', window_name)
 
-        return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v), threshold
+        return threshold
 
     def masked_stream(self, preset_hsv = False):
 
         hsv_window_name = "hsv_window"
+        threshold_window = "thresh_window"
     
-            # Create a window and the trackbars for HSV control
+        # Create a window and the trackbars for HSV control
         cv2.namedWindow(hsv_window_name)
         self.create_hsv_trackbars(hsv_window_name)
+
+        cv2.namedWindow(threshold_window)
+        self.create_threshold_trackbar(threshold_window)
         try:
             while True:
                 # Get frameset of color and depth
@@ -167,13 +173,14 @@ class Viewer:
                 color_image = np.asanyarray(color_frame.get_data())
 
                 if preset_hsv:
-                    lower_hsv = (50, 30, 36)
-                    upper_hsv = (176, 249, 171)
-                    thresh = 20
+                    lower_hsv = (80, 35, 0)
+                    upper_hsv = (176, 230, 230)
+                    thresh = 170
                 else:
-                    lower_hsv, upper_hsv, thresh = self.get_hsv_values(hsv_window_name)
+                    lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)
+                    thresh = self.get_threshold_val(threshold_window)
                 mask, _ = mask_hsv(color_image, lower_hsv, upper_hsv)
-
+                mask = cv2.GaussianBlur(mask, (5, 5), 0)
                 # convert non-3d images to 3d
                 depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels -> expanding dimensionality to enable comparison
                 mask_3d = np.dstack((mask, mask, mask))
@@ -190,15 +197,15 @@ class Viewer:
                     print("Too far! Else object not found")
                 else:
                     print(f"The COM of the largest contour is at {coms} with area {area}.")
-
+                    
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
                 contour_image = cv2.cvtColor(mask_bg_removed[:,:,0], cv2.COLOR_GRAY2BGR)  # Ensure it's in BGR for color drawing
                 cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)  # Draw all contours with green color
-
-                # Display the image with contours
-                cv2.imshow('Contours', contour_image)
+                cv2.circle(contour_image, coms, 10, (0, 0, 255), -1)
+                # Display the image with cqontours
+                cv2.imshow(threshold_window, contour_image)
                 # Display
                 cv2.imshow(hsv_window_name, images)
 

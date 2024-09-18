@@ -26,7 +26,7 @@ def ordered_contour(image, threshold):
         if area > 50:
 
             # Smooth contours
-            epsilon = 0.02 * cv2.arcLength(c, True)  # Tweak epsilon for more or less smoothness
+            epsilon = 0.05 * cv2.arcLength(c, True)  # Tweak epsilon for more or less smoothness
             approx = cv2.approxPolyDP(c, epsilon, True)
 
             # Calculate moments for each contour
