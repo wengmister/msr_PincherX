@@ -1,4 +1,5 @@
 from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
+from interbotix_xs_modules.xs_robot.gripper import InterbotixGripperXS
 from interbotix_common_modules.common_robot.robot import robot_shutdown, robot_startup
 import numpy as np
 # The robot object is what you use to control the robot
@@ -9,6 +10,7 @@ class Robot:
         self.robot = InterbotixManipulatorXS("px100", "arm", "gripper")
         robot_startup()
         self.robot.arm.go_to_home_pose()
+        self.robot.gripper.release()
 
     def shutdown(self):
         robot_shutdown()
@@ -36,7 +38,7 @@ class Robot:
             case 0:
                 joint = "waist"
             case 1:
-                joint = "shoudler"
+                joint = "shoulder"
             case 2:
                 joint = "elbow"
             case 3:
@@ -48,16 +50,26 @@ class Robot:
 
         print(f"Moving {joint} joint, current angle: {current_angle}, new angle: {new_angle}")
         self.robot.arm.set_single_joint_position(joint, new_angle)
+
+    def gripper_close(self):
+        self.robot.gripper.grasp()
+
+    def gripper_open(self):
+        self.robot.gripper.release()
                 
 
-
+class Gripper:
+    def __init__(self):
+        self.gripper
         
 
 if __name__ == "__main__":
 
     test_robot = Robot()
 
-    test_robot.move_joint(3, -20)
+
+
+    test_robot.move_joint(3, -0.5)
 
     test_robot.step("z", +0.05)
 
@@ -67,6 +79,6 @@ if __name__ == "__main__":
 
     test_robot.step("z", -0.05)
 
-    test_robot.step("x", -0.05)
+    test_robot.step("x", 0.05)
 
     test_robot.shutdown()
