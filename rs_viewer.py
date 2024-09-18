@@ -97,11 +97,11 @@ class Viewer:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((bg_removed, depth_colormap))
 
-                cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
-                cv2.imshow('Align Example', images)
+                cv2.namedWindow("Align Example", cv2.WINDOW_NORMAL)
+                cv2.imshow("Align Example", images)
                 key = cv2.waitKey(1)
-                # Press esc or 'q' to close the image window
-                if key & 0xFF == ord('q') or key == 27:
+                # Press esc or "q" to close the image window
+                if key & 0xFF == ord("q") or key == 27:
                     cv2.destroyAllWindows()
                     break
         finally:
@@ -112,33 +112,33 @@ class Viewer:
 
     def create_hsv_trackbars(self, window_name):
         # Create trackbars for lower HSV values
-        cv2.createTrackbar('Lower H', window_name, 0, 179, self.on_trackbar)
-        cv2.createTrackbar('Lower S', window_name, 0, 255, self.on_trackbar)
-        cv2.createTrackbar('Lower V', window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar("Lower H", window_name, 0, 179, self.on_trackbar)
+        cv2.createTrackbar("Lower S", window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar("Lower V", window_name, 0, 255, self.on_trackbar)
 
         # Create trackbars for upper HSV values
-        cv2.createTrackbar('Upper H', window_name, 0, 179, self.on_trackbar)
-        cv2.createTrackbar('Upper S', window_name, 0, 255, self.on_trackbar)
-        cv2.createTrackbar('Upper V', window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar("Upper H", window_name, 0, 179, self.on_trackbar)
+        cv2.createTrackbar("Upper S", window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar("Upper V", window_name, 0, 255, self.on_trackbar)
 
     def create_threshold_trackbar(self, window_name):
-        cv2.createTrackbar('Threshold', window_name, 0, 255, self.on_trackbar)
+        cv2.createTrackbar("Threshold", window_name, 0, 255, self.on_trackbar)
 
     def get_hsv_values(self, window_name):
         # Get current positions of all trackbars for lower HSV
-        lower_h = cv2.getTrackbarPos('Lower H', window_name)
-        lower_s = cv2.getTrackbarPos('Lower S', window_name)
-        lower_v = cv2.getTrackbarPos('Lower V', window_name)
+        lower_h = cv2.getTrackbarPos("Lower H", window_name)
+        lower_s = cv2.getTrackbarPos("Lower S", window_name)
+        lower_v = cv2.getTrackbarPos("Lower V", window_name)
 
         # Get current positions of all trackbars for upper HSV
-        upper_h = cv2.getTrackbarPos('Upper H', window_name)
-        upper_s = cv2.getTrackbarPos('Upper S', window_name)
-        upper_v = cv2.getTrackbarPos('Upper V', window_name)
+        upper_h = cv2.getTrackbarPos("Upper H", window_name)
+        upper_s = cv2.getTrackbarPos("Upper S", window_name)
+        upper_v = cv2.getTrackbarPos("Upper V", window_name)
 
         return (lower_h, lower_s, lower_v), (upper_h, upper_s, upper_v),
 
     def get_threshold_val(self, window_name):
-        threshold = cv2.getTrackbarPos('Threshold', window_name)
+        threshold = cv2.getTrackbarPos("Threshold", window_name)
 
         return threshold
 
@@ -203,7 +203,7 @@ class Viewer:
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
-                contour_image = cv2.cvtColor(mask_bg_removed[:,:,0], cv2.COLOR_GRAY2BGR)  # Ensure it's in BGR for color drawing
+                contour_image = cv2.cvtColor(mask_bg_removed[:,:,0], cv2.COLOR_GRAY2BGR)  # Ensure it"s in BGR for color drawing
                 cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)  # Draw all contours with green color
                 cv2.circle(contour_image, coms, 10, (0, 0, 255), -1)
                 # Display the image with cqontours
@@ -213,8 +213,8 @@ class Viewer:
 
                 # Terminal commands
                 key = cv2.waitKey(1)
-                # Press esc or 'q' to close the image window
-                if key & 0xFF == ord('q') or key == 27:
+                # Press esc or "q" to close the image window
+                if key & 0xFF == ord("q") or key == 27:
                     cv2.destroyAllWindows()
                     break
         finally:
