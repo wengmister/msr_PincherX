@@ -182,8 +182,8 @@ class Viewer:
 
                 # preset values
                 if preset_hsv:
-                    lower_hsv = (115, 90, 55)
-                    upper_hsv = (135, 245, 245)
+                    lower_hsv = (115, 90, 80)
+                    upper_hsv = (135, 245, 200)
                     thresh = 120
                 else:
                     lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)

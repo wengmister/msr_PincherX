@@ -4,10 +4,10 @@ import cv2
 
 def ordered_contour(image, threshold):
 
-    blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
+    # blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
 
     # Apply threshold to get binary image
-    ret, thresh = cv2.threshold(blurred_image, threshold, 255, 0)
+    ret, thresh = cv2.threshold(image, threshold, 255, 0)
     
     # Find contours
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -26,11 +26,11 @@ def ordered_contour(image, threshold):
         if area > 50:
 
             # Smooth contours
-            epsilon = 0.05 * cv2.arcLength(c, True)  # Tweak epsilon for more or less smoothness
-            approx = cv2.approxPolyDP(c, epsilon, True)
+            # epsilon = 0.05 * cv2.arcLength(c, True)  # Tweak epsilon for more or less smoothness
+            # approx = cv2.approxPolyDP(c, epsilon, True)
 
             # Calculate moments for each contour
-            M = cv2.moments(approx)
+            M = cv2.moments(c)
 
             # Ensure m00 is not zero to avoid division by zero
             if M["m00"] != 0:
