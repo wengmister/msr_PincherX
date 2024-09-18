@@ -2,6 +2,7 @@ from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
 from interbotix_common_modules.common_robot.robot import robot_shutdown, robot_startup
 import numpy as np
 import modern_robotics as mr
+from calibration_points import *
 
 
 
@@ -103,11 +104,18 @@ if __name__ == "__main__":
 
     test_robot = Robot()
 
-    calibration_list = [[0.2, -0.2, 0.1]
-                        [0.2 ,0.2, 0.1]
-                        [-0.2, -0.2, 0.1]]
+    x_limit = 0.2  # Define limits for x axis
+    y_limit = 0.2  # Define limits for y axis
+    z_limit = 0.3  # Define limits for z axis
+    num_points_x = 3  # Number of points along the x axis
+    num_points_y = 3  # Number of points along the y axis
+    num_points_z = 2  # Number of points along the z axis
 
-    test_robot.robot.arm.set_ee_pose_components(0.2, -0.2, 0.1)
+    calibration_coordinates = generate_linspaced_coordinates(x_limit, y_limit, z_limit, num_points_x, num_points_y, num_points_z)
+
+    for i in calibration_coordinates:
+        
+        test_robot.robot.arm.set_ee_pose_components(i[0], i[1], i[2])
     
     test_robot.robot.gripper.grasp()
     # test_robot.move_joint(3, -0.5)
