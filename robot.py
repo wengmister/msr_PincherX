@@ -1,9 +1,28 @@
 from interbotix_xs_modules.xs_robot.arm import InterbotixManipulatorXS
-from interbotix_xs_modules.xs_robot.gripper import InterbotixGripperXS
 from interbotix_common_modules.common_robot.robot import robot_shutdown, robot_startup
 import numpy as np
-# The robot object is what you use to control the robot
+import modern_robotics as mr
 
+
+
+
+def htm_from_xz_only(x, z):
+    """
+    Produce a homogeneous transformation matrix given x and z, ignoring the y input.
+    
+    Parameters:
+    x (float): Translation along the x-axis
+    z (float): Translation along the z-axis
+    
+    Returns:
+    numpy.ndarray: The 4x4 homogeneous transformation matrix
+    """
+    # Create the homogeneous transformation matrix with only translation
+    T = np.eye(4)
+    T[0, 3] = x  # Set translation along the x-axis
+    T[2, 3] = z  # Set translation along the z-axis
+    
+    return T
 
 class Robot:
     def __init__(self):
@@ -56,29 +75,45 @@ class Robot:
 
     def gripper_open(self):
         self.robot.gripper.release()
-                
 
-class Gripper:
-    def __init__(self):
-        self.gripper
-        
+    def capture(self, x, y, z):
+        self.robot.arm.set_ee_pose_components(x,y,z)
+
+
+    # I dont think this works         
+    def robot_IK(self, desired):
+        Blist = self.robot.arm.robot_des.M
+        thetalist0 = np.array([0.1, 0.1, 0.1, 0.1])
+        M = self.robot.arm.get_ee_pose()
+        T = desired
+        thetalist, success = mr.IKinBody(Blist, M, T, thetalist0, 0.01, 0.01)
+
+        if success:
+            print(f"Solution found. Moving to {thetalist}")
+            return thetalist
+        else:
+            print(f"No solution found.")
+            return self.robot.arm.get_joint_commands()
+
+
+
+    
 
 if __name__ == "__main__":
 
     test_robot = Robot()
 
+    test_robot.robot.arm.set_ee_pose_components(0.2, -0.2, 0.1)
+    
+    test_robot.robot.gripper.grasp()
+    # test_robot.move_joint(3, -0.5)
 
+    # test_robot.step("z", +0.05)
 
-    test_robot.move_joint(3, -0.5)
+    # test_robot.step("x", -0.05)
 
-    test_robot.step("z", +0.05)
+    # test_robot.step("y", -0.5)
 
-    test_robot.step("x", -0.05)
-
-    test_robot.step("y", -0.5)
-
-    test_robot.step("z", -0.05)
-
-    test_robot.step("x", 0.05)
+    # test_robot.step("z", -0.05)
 
     test_robot.shutdown()
