@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from mask import *
+from contour import *
 
 
 class Viewer:
@@ -136,6 +137,10 @@ class Viewer:
                 removed_color = 0
                 bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, color_image)
                 mask_bg_removed = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), removed_color, mask_3d)
+
+                # Trace contour
+                cont, area = ordered_contour(mask_bg_removed[0], threshold=10)
+                print(area)
 
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
