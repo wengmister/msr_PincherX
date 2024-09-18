@@ -4,6 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 from mask import *
 from contour import *
+from depth import *
 
 
 class Viewer:
@@ -173,8 +174,8 @@ class Viewer:
                 color_image = np.asanyarray(color_frame.get_data())
 
                 if preset_hsv:
-                    lower_hsv = (80, 35, 0)
-                    upper_hsv = (176, 230, 230)
+                    lower_hsv = (100, 90, 52)
+                    upper_hsv = (176, 245, 245)
                     thresh = 170
                 else:
                     lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)
@@ -196,7 +197,8 @@ class Viewer:
                 if not area:
                     print("Too far! Else object not found")
                 else:
-                    print(f"The COM of the largest contour is at {coms} with area {area}.")
+                    distance_com = get_distance_at_point(depth_image, coms[0], coms[1])
+                    print(f"The COM of the largest contour is at {coms} with area {area}. The centroid is {self.get_meter_distance(distance_com)}m away")
                     
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
