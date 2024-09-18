@@ -275,7 +275,7 @@ class Viewer:
 
         if not area:
             print("Too far! Else object not found")
-            return None, None
+            return None, None, None
 
         # Calculate the distance of the centroid in camera space
         distance_com = get_distance_at_point(depth_image, coms[0], coms[1])
@@ -284,6 +284,18 @@ class Viewer:
         # Return the centroid and its depth
         return coms, distance_in_meters, aligned_depth_frame
 
+    def target_acquisition(self):
+        centroid, depth, depth_frame = self.get_centroid_and_depth()
+        print(centroid, depth)
+
+        if centroid != None:
+        
+            # deproject 2d points to 3d space
+            intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
+            point_pos = rs.rs2_deproject_pixel_to_point(intrinsics, [centroid[0], centroid[1]], depth)
+            return point_pos
+        else:
+            return None
 
 if __name__=="__main__":
 
