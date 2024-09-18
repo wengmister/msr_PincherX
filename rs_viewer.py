@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mask import *
 from contour import *
 from depth import *
-
+from motion import *
 
 class Viewer:
     def __init__(self, enable_record = False, enable_playback = False, filename = None):
@@ -19,8 +19,10 @@ class Viewer:
         device_product_line = str(device.get_info(rs.camera_info.product_line))
         print(f"Device started: {device_product_line}")
 
+        # enable data streams
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        self.config.enable_stream(rs.stream.accel)
 
         if enable_record:
             self.config.enable_record_to_file(filename)
@@ -165,18 +167,24 @@ class Viewer:
                 # Get aligned frames
                 aligned_depth_frame = aligned_frames.get_depth_frame() # aligned_depth_frame is a 640x480 depth image
                 color_frame = aligned_frames.get_color_frame()
+                accel_frame = get_accel_frame(aligned_frames, 2)
 
-                # Validate that both frames are valid
-                if not aligned_depth_frame or not color_frame:
+                # Validate that all frames are valid
+                if not aligned_depth_frame or not color_frame or not accel_frame.all():
                     continue
+
+                # reminder to flip camera
+                if accel_frame[1] > 0:
+                    print(f"Camera is upside down. Flip it!!")
 
                 depth_image = np.asanyarray(aligned_depth_frame.get_data())
                 color_image = np.asanyarray(color_frame.get_data())
 
+                # preset values
                 if preset_hsv:
-                    lower_hsv = (100, 90, 52)
-                    upper_hsv = (176, 245, 245)
-                    thresh = 170
+                    lower_hsv = (115, 90, 55)
+                    upper_hsv = (135, 245, 245)
+                    thresh = 120
                 else:
                     lower_hsv, upper_hsv = self.get_hsv_values(hsv_window_name)
                     thresh = self.get_threshold_val(threshold_window)
@@ -227,12 +235,12 @@ if __name__=="__main__":
     # test_viewer = Viewer(enable_playback=True, filename="test_record.bag")
     
     test_viewer = Viewer()
-    test_viewer.masked_stream(True)
+    test_viewer.masked_stream(preset_hsv=True)
 
-    depth, color = test_viewer.get_frames()
+    # depth, color = test_viewer.get_frames()
 
-    print(depth.shape)
-    print(color)
+    # print(depth.shape)
+    # print(color)
 
     # color = cv2.cvtColor(color, cv2.COLOR_BGR2HSV) #
     # plt.imshow(color)
