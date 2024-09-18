@@ -178,13 +178,19 @@ class Viewer:
 
                 # Trace contour
                 cont, area = ordered_contour(mask_bg_removed[0], threshold=10)
-                print(area)
+                if not area:
+                    print("Too far! Else object not found")
+                else:
+                    print(area)
 
                 # Render images:
                 depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
                 images = np.hstack((mask_bg_removed, depth_colormap, bg_removed))
 
+                # Display
                 cv2.imshow(hsv_window_name, images)
+
+                # Terminal commands
                 key = cv2.waitKey(1)
                 # Press esc or 'q' to close the image window
                 if key & 0xFF == ord('q') or key == 27:
