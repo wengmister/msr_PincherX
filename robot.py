@@ -76,8 +76,6 @@ class Robot:
             print(f"No solution found.")
             return self.robot.arm.get_joint_commands()
 
-
-
     
 
 if __name__ == "__main__":
@@ -98,16 +96,5 @@ if __name__ == "__main__":
     for i in calibration_coordinates:
         
         test_robot.robot.arm.set_ee_pose_components(i[0], i[1], i[2])
-    
-    test_robot.robot.gripper.grasp()
-    # test_robot.move_joint(3, -0.5)
-
-    # test_robot.step("z", +0.05)
-
-    # test_robot.step("x", -0.05)
-
-    # test_robot.step("y", -0.5)
-
-    # test_robot.step("z", -0.05)
 
     test_robot.shutdown()
