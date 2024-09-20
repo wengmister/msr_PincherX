@@ -19,6 +19,9 @@ def calibrate(test_robot: Robot, test_viewer: Viewer):
         test_robot.robot.arm.set_ee_pose_components(i[0], i[1], i[2])
 
         point_pos = test_viewer.target_acquisition()
+
+        if point_pos == None:
+            print("Potential calibration failure! Consider repositioning camera.")
         # centroid, depth, depth_frame = test_viewer.get_centroid_and_depth()
         # print(centroid, depth)
         
